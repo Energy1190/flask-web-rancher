@@ -25,6 +25,7 @@ class RancherAPI():
         self.dockercompose = None
         self.ranchercompose = None
         self.description = None
+        self.environment = {'SITEURL': None}
         self.group = "io.rancher.service.create_by_app"
 
         self.data = {}
@@ -98,6 +99,7 @@ class RancherAPI():
         self.data['name'] = (self.name or "Unknown-stack")
         self.data['description'] = (self.description or "No description")
         self.data['group'] = self.group
+        self.data['environment'] = self.environment
         if self.dockercompose: self.data['dockerCompose'] = self.dockercompose
         if self.ranchercompose: self.data['rancherCompose'] = self.ranchercompose
 

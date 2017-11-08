@@ -58,7 +58,8 @@ def create_stack(site_url, stack_name, env=None):
         x.close()
         return r
 
-    x = RancherAPI(key=env.env.get('RANCHER_API_KEY'), secret=env.env.get('RANCHER_API_SECRET'), base_url=site_url)
+    x = RancherAPI(key=env.env.get('RANCHER_API_KEY'), secret=env.env.get('RANCHER_API_SECRET'), base_url=env.env.get('RANCHER_API_URL'))
+    x.environment['SITEURL'] = site_url
     x.set_project()
     x.dockercompose = frormat_compose(f_read('files/docker-compose.yaml'), env=env.env)
     x.ranchercompose = frormat_compose(f_read('files/rancher-compose.yaml'), env=env.env)
