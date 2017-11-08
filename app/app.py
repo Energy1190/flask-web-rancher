@@ -29,7 +29,7 @@ def query_args(func):
         args_r = {}
         if request.method == 'GET':
             args_r = {i: request.args.get(i) for i in list(request.args)}
-            if args_r.get('rancher-url'): envs.env['URL'] = args_r.get('rancher-url')
+            if args_r.get('rancher-url'): envs.env['RANCHER_API_URL'] = args_r.get('rancher-url')
         if request.method == 'POST':
             prepare_create(request)
         x = func(*args, q_args=args_r, **kwargs)
