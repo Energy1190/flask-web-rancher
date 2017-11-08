@@ -3,52 +3,10 @@ version: '2.1'
 services:
     nginx:
         container_name: streaming-nginx
-        image: mkwithus/videostream-nginx-vod:latest
+        image: nginx:stable
         #build:
         #    context: ./docker/nginx-vod
         ports:
             - "80:80"
-            #- "433:433"
-        volumes_from:
-            - "app"
+            - "433:433"
 
-    nginx-rtmp:
-        container_name: streaming-nginx-rtmp
-        image: mkwithus/videostream-nginx-rtmp:latest
-        #build:
-        #    context: ./docker/nginx-rtmp
-        ports:
-            - "1935:1935"
-            - "8081:8080"
-
-    db:
-        container_name: streaming-mysql
-        image: mysql:latest
-        environment:
-            # with mysql
-            MYSQL_DATABASE: streaming
-            MYSQL_USER: streaming
-            MYSQL_PASSWORD: nXa6bPxadNTq3fKQFtyKVcsUHcQhehJx2unsnhUB
-            MYSQL_ROOT_PASSWORD: Vwes473EGqXXgwqnr3jvTZWe72A3auZX5vvazmAt
-
-    app:
-        container_name: streaming-app
-        build:
-            context: ./
-            dockerfile: ./docker/app/Dockerfile
-        volumes:
-            - "/var/www/public"
-            - "/var/www/storage"
-            - "/var/www/bootstrap/cache"
-        links:
-            - db
-            - nginx-rtmp
-        environment:
-            # with mysql
-            DB_HOST: db
-            DB_DATABASE: streaming
-            DB_USERNAME: streaming
-            DB_PASSWORD: nXa6bPxadNTq3fKQFtyKVcsUHcQhehJx2unsnhUB
-            DB_CONNECTION: mysql
-            XDEBUG_CONFIG: remote_host=192.168.0.105
-            PHP_IDE_CONFIG: "serverName=my.local"
