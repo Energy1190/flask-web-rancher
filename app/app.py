@@ -18,7 +18,10 @@ def prepare_create(request):
     x = request.form.get('site-url')
     y = request.form.get('instance_name')
     if x and y:
-        create_database(y, env=envs.env)
+        try:
+            create_database(y, env=envs.env)
+        except:
+            print('Database was not created.')
         create_stack(x,y, env=envs)
 
 def query_args(func):
