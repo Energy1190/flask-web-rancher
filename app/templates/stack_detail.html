@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Detail{% endblock %}
+{% block content %}
+<h1>Hello! You service: {{ stack.name }}</h1>
+<h2>Site-url: {{ stack.base_url }}</h2>
+<div class="table-responsive">
+    <table class="table table-condensed">
+        {% for i in detail %}
+        <tr>
+            <td><label for="{{ i }}">{{ i }}</label></td>
+            <td><label for="{{ detail[i] }}">{{ detail[i] }}</label></td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+{% endblock %}

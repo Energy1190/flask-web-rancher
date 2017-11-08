@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}List{% endblock %}
+{% block content %}
+<h1>Hello! You service list.</h1>
+<h2>Site-url: {{ base_url }}</h2>
+{% for i in stacks %}
+<div class="table-responsive">
+    <table class="table table-condensed">
+        <tr>
+            <td><label for="id">ID</label></td>
+            <td><label for="{{ i[0] }}">{{ i[0] }}</label></td>
+        </tr>
+        <tr>
+            <td><label for="name">Name</label></td>
+            <td><label for="{{ i[1] }}">{{ i[1] }}</label></td>
+        </tr>
+        <tr>
+            <td><label for="url">Url</label></td>
+            <td><label for="{{ i[2] }}">{{ i[2] }}</label></td>
+        </tr>
+        <tr>
+            <td><label for="detail"><a href="{{ url_for('detail_stack', name=i[0]) }}">Detail</a></label></td>
+        </tr>
+    </table>
+</div>
+{% endfor %}
+{% endblock %}
