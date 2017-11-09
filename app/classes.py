@@ -22,7 +22,8 @@ class RancherAPI():
 
         self.name = None
         self.id = None
-
+        self.serviceid = None
+        
         self.dockercompose = None
         self.ranchercompose = None
         self.description = None
@@ -94,7 +95,13 @@ class RancherAPI():
             self.loadbalancer = self.get_load_balancer_list()['data'][0]['id']
         else:
             self.loadbalancer = name
-
+            
+    def set_service_id(self, name=None):
+        if not name and len(self.get_service_list()['data']) == 1:
+            self.serviceid = self.get_service_list()['data'][0]['id']
+        else:
+            self.serviceid = name
+            
     def set_data(self):
         self.data['type'] = 'stack'
         self.data['name'] = (self.name or "Unknown-stack")
@@ -146,4 +153,12 @@ class RancherAPI():
         assert self.loadbalancer
         data = {"serviceLink": {"name":self.name + '_lb', "serviceid": self.id, "uuid": uuid.uuid4()}}
         x = requests.post(self.base_url + '/v2-beta/projects/{}/loadbalancerservices/{}/?action=addservicelink'.format(self.project, self.loadbalancer), data=json.dumps(data), **kwargs)
+        return x.json()
+    
+    @auth
+    @error
+    def get_service_list(self, **kwargs):
+        assert self.project
+        assert self.id
+        x = requests.get(self.base_url + '/v2-beta/projects/{}/stacks/{}/services'.format(self.project, self.id), **kwargs)
         return x.json()
