@@ -1,6 +1,6 @@
 import os
 import re
-import _mysql
+import MySQLdb
 from classes import Env, RancherAPI
 
 def environment_from_file(env_class_obj):
@@ -30,15 +30,16 @@ def environment(env_class_obj):
     return env_class_obj
 
 def create_database(database, env=None):
-    c = _mysql.connection(user=env['DB_ADMIN_USERNAME'],passwd=env['DB_ADMIN_PASSWORD'],host=env['DB_HOST'],port=env['DB_PORT'])
+    conn = MySQLdb.connect(user=env['DB_ADMIN_USERNAME'],passwd=env['DB_ADMIN_PASSWORD'],host=env['DB_HOST'],port=env['DB_PORT'])
+    c = conn.cursor()
 
-    c.query("CREATE DATABASE IF NOT EXISTS {} COLLATE = 'utf8_general_ci' CHARACTER SET = 'utf8'".format(database))
-    c.query("CREATE USER IF NOT EXISTS '{}'@'%' IDENTIFIED BY {}".format(database, database))
-    c.query("GRANT ALL ON {}.* TO '{}'@'localhost' IDENTIFIED BY {}".format(database, database, database))
-    c.query("GRANT ALL ON {}.* TO '{}'@'%' IDENTIFIED BY '{}".format(database, database, database))
+    c.execute("CREATE DATABASE IF NOT EXISTS {} COLLATE = 'utf8_general_ci' CHARACTER SET = 'utf8'".format(database))
+    c.execute("CREATE USER IF NOT EXISTS '{}'@'%' IDENTIFIED BY {}".format(database, database))
+    c.execute("GRANT ALL ON {}.* TO '{}'@'localhost' IDENTIFIED BY {}".format(database, database, database))
+    c.execute("GRANT ALL ON {}.* TO '{}'@'%' IDENTIFIED BY '{}".format(database, database, database))
     c.commit()
-    
     c.close()
+    conn.close()
 
 def frormat_compose(str_obj, env=None):
     def regxp(s, pat, r):
