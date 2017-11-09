@@ -30,15 +30,14 @@ def environment(env_class_obj):
     return env_class_obj
 
 def create_database(database, env=None):
-    c = _mysql.connect(username=env['DB_ADMIN_USERNAME'],password=env['DB_ADMIN_PASSWORD'],hostname=env['DB_HOST'],port=env['DB_PORT'])
+    c = _mysql.connection(user=env['DB_ADMIN_USERNAME'],passwd=env['DB_ADMIN_PASSWORD'],host=env['DB_HOST'],port=env['DB_PORT'])
 
-    cursor = c.cursor()
-    cursor.execute("CREATE DATABASE IF NOT EXISTS {} COLLATE = 'utf8_general_ci' CHARACTER SET = 'utf8'".format(database))
-    cursor.execute("CREATE USER IF NOT EXISTS '{}'@'%' IDENTIFIED BY {}".format(database, database))
-    cursor.execute("GRANT ALL ON {}.* TO '{}'@'localhost' IDENTIFIED BY {}".format(database, database, database))
-    cursor.execute("GRANT ALL ON {}.* TO '{}'@'%' IDENTIFIED BY '{}".format(database, database, database))
-    cursor.commit()
-    cursor.close()
+    c.query("CREATE DATABASE IF NOT EXISTS {} COLLATE = 'utf8_general_ci' CHARACTER SET = 'utf8'".format(database))
+    c.query("CREATE USER IF NOT EXISTS '{}'@'%' IDENTIFIED BY {}".format(database, database))
+    c.query("GRANT ALL ON {}.* TO '{}'@'localhost' IDENTIFIED BY {}".format(database, database, database))
+    c.query("GRANT ALL ON {}.* TO '{}'@'%' IDENTIFIED BY '{}".format(database, database, database))
+    c.commit()
+    
     c.close()
 
 def frormat_compose(str_obj, env=None):
