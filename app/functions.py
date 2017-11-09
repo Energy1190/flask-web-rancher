@@ -42,13 +42,15 @@ def create_database(database, env=None):
     conn.close()
 
 def frormat_compose(str_obj, env=None):
-    def regxp(s, pat, r):
-        x = re.findall(pat, s)
-        if x and r:
-            s = s.replace(x[0], r)
+    def regxp(s,env):
+        for i in env:
+            r = env[i]
+            x = re.findall(i, s)
+            if x and r:
+                s = s.replace(x[0], r)
         return s
 
-    x = [regxp(i, r'\s*{}: (.*)'.format(j), env[j]) for i in str_obj.split(sep='\n') for j in env]
+    x = [regxp(i, env) for i in str_obj.split(sep='\n')]
     return '\n'.join(x)
 
 def create_stack(site_url, stack_name, env=None):
