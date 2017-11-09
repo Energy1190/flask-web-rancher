@@ -62,7 +62,8 @@ def detail_stack(name, q_args=None, **kwargs):
     if not envs.env.get('RANCHER_API_URL'): return render_template('get_url.html')
     r = RancherAPI(key=envs.env.get('RANCHER_API_KEY'), secret=envs.env.get('RANCHER_API_SECRET'), base_url=envs.env.get('RANCHER_API_URL'))
     r.set_project()
-    detail = [i for i in r.get_stack(name) if i in magic_list]
+    x = r.get_stack(name)
+    detail = {i:x[i] for i in x if i in magic_list}
     return render_template('stack_detail.html', stack=r, detail=detail)
 
 if __name__ == "__main__":
