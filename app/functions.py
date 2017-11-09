@@ -44,7 +44,7 @@ def create_database(database, env=None):
 def frormat_compose(str_obj, env=None):
     def regxp(s, pat, r):
         x = re.findall(pat, s)
-        if x:
+        if x and r:
             s = s.replace(x[0], r)
         return s
 
