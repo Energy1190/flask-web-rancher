@@ -151,7 +151,8 @@ class RancherAPI():
     def register_lb(self, **kwargs):
         assert self.project
         assert self.loadbalancer
-        data = {"serviceLink": {"name":self.name + '_lb', "serviceid": self.id, "uuid": uuid.uuid4()}}
+        assert self.serviceid
+        data = {"serviceLink": {"name":self.name + '_lb', "serviceid": self.serviceid, "uuid": uuid.uuid4()}}
         x = requests.post(self.base_url + '/v2-beta/projects/{}/loadbalancerservices/{}/?action=addservicelink'.format(self.project, self.loadbalancer), data=json.dumps(data), **kwargs)
         return x.json()
     
