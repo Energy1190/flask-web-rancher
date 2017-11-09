@@ -68,7 +68,10 @@ def create_stack(site_url, stack_name, env=None):
     x.name = stack_name
     x.create_stack()
     x.set_load_balancer()
-    if x.loadbalancer: 
-        x.set_service_id()
-        x.register_lb()
+    try:
+        if x.loadbalancer: 
+            x.set_service_id()
+            x.register_lb()
+    except:
+        print('Load balancer was not created.')
     return (x.id, x.name)
