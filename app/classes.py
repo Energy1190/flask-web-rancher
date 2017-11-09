@@ -1,4 +1,5 @@
 import uuid
+import json
 import requests
 from requests.auth import HTTPBasicAuth
 
@@ -109,7 +110,7 @@ class RancherAPI():
     def create_stack(self, **kwargs):
         assert self.project
         self.set_data()
-        x = requests.post(self.base_url  + '/v2-beta/projects/{}/stacks'.format(self.project), data=self.data, **kwargs)
+        x = requests.post(self.base_url  + '/v2-beta/projects/{}/stacks'.format(self.project), data=json.dumps(self.data), **kwargs)
         return x.json()
 
     @auth
