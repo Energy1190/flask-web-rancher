@@ -85,7 +85,7 @@ def create_stack(site_url, stack_name, env=None):
     x.name = stack_name
     x.create_stack()
     if len(x.errordata): return x.errordata
-    x.set_load_balancer()
+    x.set_load_balancer(name=env.app_env.get('RANCHER_LB_NAME'))
     if len(x.errordata): return x.errordata
 
     if x.loadbalancer:
@@ -94,6 +94,7 @@ def create_stack(site_url, stack_name, env=None):
         if not x.serviceid: return {'type': 'error', 'status': 500, 'code': 'Empty ServiceId, service was not created'}
         x.register_lb()
         if len(x.errordata): return x.errordata
+        print(x.get_lb())
     return {'id': x.id, 'name': x.name, 'type': 'succsess'}
 
 def conver_to_html():

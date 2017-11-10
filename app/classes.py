@@ -39,6 +39,7 @@ class RancherAPI():
 
         self.data = {}
         self.errordata = {}
+        self.lb = {}
 
     def error(func):
         def wrap(self, *args, **kwargs):
@@ -108,11 +109,14 @@ class RancherAPI():
         else:
             self.project = name
 
-    def set_load_balancer(self, name=None):
-        if not name and len(self.get_load_balancer_list()['data']) == 1:
+    def set_load_balancer(self, name=None, id=None):
+        if not name and not id and len(self.get_load_balancer_list()['data']) == 1:
             self.loadbalancer = self.get_load_balancer_list()['data'][0]['id']
-        else:
-            self.loadbalancer = name
+        elif id:
+            self.loadbalancer = id
+        elif name:
+            x =[i['id'] for i in self.get_load_balancer_list()['data'] if i['name'] == name]
+            if len(x) == 1: self.loadbalancer = x[0]
 
     def set_stack_id(self, name=None):
         if not name and len(self.get_stack_list()['data']) == 1:
@@ -184,3 +188,20 @@ class RancherAPI():
         x = requests.post(self.base_url + '/v2-beta/projects/{}/loadbalancerservices/{}/?action=addservicelink'.format(self.project, self.loadbalancer), data=json.dumps(data), **kwargs)
         return x.json()
 
+    @auth
+    @error
+    def get_lb(self):
+        assert self.project
+        assert self.loadbalancer
+        x = requests.get(self.base_url + '/v2-beta/projects/{}/loadbalancerservices/{}'.format(self.project, self.loadbalancer), **kwargs)
+        return x.json()
+
+    @auth
+    @error
+    def update_lb(self):
+        assert self.project
+        assert self.loadbalancer
+        assert self.lb
+        data = self.lb
+        x = requests.put(self.base_url + '/v2-beta/projects/{}/loadbalancerservices/{}'.format(self.project, self.loadbalancer), data=data, **kwargs)
+        return x.json()

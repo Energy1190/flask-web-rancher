@@ -4,9 +4,4 @@ services:
     nginx:
         container_name: streaming-nginx
         image: nginx:stable
-        #build:
-        #    context: ./docker/nginx-vod
-        ports:
-            - "80:80"
-            - "433:433"
 
