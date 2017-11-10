@@ -78,6 +78,11 @@ def delete_stack(name, q_args=None, **kwargs):
                                                          status=x.get('status'))
     else:
         return list_stack()
+    
+@app.route("/help/", methods=['GET'])
+@query_args
+def help_me(q_args=None, **kwargs):
+    return Response(response='Help here!', status=200)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
