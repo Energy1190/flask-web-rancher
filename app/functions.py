@@ -71,7 +71,7 @@ def create_stack(site_url, stack_name, env=None):
 
     env.docker_env['DB_USERNAME'] = stack_name + '_user'
     env.docker_env['DB_PASSWORD'] = str(uuid.uuid4())
-    env.docker_env['DB_NAME'] = stack_name
+    env.docker_env['DB_NAME'] = stack_name.replace('-', '_')
 
     x = RancherAPI(key=env.app_env.get('RANCHER_API_KEY'), secret=env.app_env.get('RANCHER_API_SECRET'), base_url=env.app_env.get('RANCHER_API_URL'))
     x.environment['SITEURL'] = site_url
