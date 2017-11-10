@@ -1,12 +1,11 @@
 from flask import Flask, request, render_template, jsonify, Response
 from classes import RancherAPI, Env
-from functions import environment, environment_from_file, create_stack, create_database
+from functions import environment, create_stack, create_database
 from functions import delete_stack as del_stack
 
 app = Flask(__name__)
 
 envs = Env()
-envs = environment_from_file(envs)
 envs = environment(envs)
 
 magic_list = ['id','name', 'environment']
