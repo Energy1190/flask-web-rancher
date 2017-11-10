@@ -24,7 +24,6 @@ def prepare_create(request):
         try:
             create_database(env=envs)
         except:
-            raise
             baseerror = {'type': 'error', 'status': 500, 'code': 'Database was not created'}
         if baseerror.get('type') == 'error':
             del_stack(stackerror.get('id'), env=envs)
