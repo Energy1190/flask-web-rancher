@@ -34,9 +34,9 @@ def create_database(env=None):
     c = conn.cursor()
 
     c.execute("CREATE DATABASE IF NOT EXISTS {} COLLATE = 'utf8_general_ci' CHARACTER SET = 'utf8'".format(database))
-    c.execute("CREATE USER IF NOT EXISTS '{}'@'%' IDENTIFIED BY {}".format(user, passwd))
-    c.execute("GRANT ALL ON {}.* TO '{}'@'localhost' IDENTIFIED BY {}".format(database, user, passwd))
-    c.execute("GRANT ALL ON {}.* TO '{}'@'%' IDENTIFIED BY '{}".format(database, user, passwd))
+    c.execute("CREATE USER IF NOT EXISTS '{}'@'%' IDENTIFIED BY '{}'".format(user, passwd))
+    c.execute("GRANT ALL ON {}.* TO '{}'@'localhost' IDENTIFIED BY '{}'".format(database, user, passwd))
+    c.execute("GRANT ALL ON {}.* TO '{}'@'%' IDENTIFIED BY '{}'".format(database, user, passwd))
     c.commit()
     c.close()
     conn.close()
