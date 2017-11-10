@@ -37,6 +37,7 @@ class RancherAPI():
         self.description = None
         self.environment = {'SITEURL': None}
         self.group = "io.rancher.service.create_by_app"
+        self.startOnCreate = True
 
         self.data = {}
         self.errordata = {}
@@ -128,16 +129,16 @@ class RancherAPI():
     def set_service_id(self, name=None, id=None, r=False):
         if not name and not id and len(self.get_service_list()['data']) == 1:
             self.serviceid = self.get_service_list()['data'][0]['id']
-            return True
+            if self.serviceid: return True
         elif id:
             self.serviceid = id
-            return True
+            if self.serviceid: return True
         elif name:
             x =[i['id'] for i in self.get_service_list()['data'] if i['name'] == name]
             if len(x) == 1:
                 self.serviceid = x[0]
-                return True
-        elif not r:
+                if self.serviceid: return True
+        if not r:
             time.sleep(5)
             self.set_service_id(name=name, id=id, r=True)
 
@@ -148,6 +149,7 @@ class RancherAPI():
         self.data['description'] = (self.description or "No description")
         self.data['group'] = self.group
         self.data['environment'] = self.environment
+        self.data['startOnCreate'] = self.startOnCreate
         if self.dockercompose: self.data['dockerCompose'] = self.dockercompose
         if self.ranchercompose: self.data['rancherCompose'] = self.ranchercompose
 
