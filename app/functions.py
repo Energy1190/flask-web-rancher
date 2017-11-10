@@ -5,18 +5,8 @@ import uuid
 import yaml
 from classes import Env, RancherAPI
 
-def environment_from_file(env_class_obj):
-    if os.path.exists('.env'):
-        x = open('.env', 'r')
-        for i in x.read().split(sep='\n'):
-            s = i.split(sep='=')
-            if len(s) == 2:
-                env_class_obj[s[0]] = env_class_obj[s[1].replace('\n','').replace('\r','')]
-        x.close()
-    return env_class_obj
-
 def environment(env_class_obj):
-    e = env_class_obj.env
+    e = env_class_obj.app_env
     for i in os.environ:
         if i in e:
             e[i] = os.environ[i]
