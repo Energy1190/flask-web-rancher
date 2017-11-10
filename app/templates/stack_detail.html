@@ -1,15 +1,20 @@
 {% extends "base.html" %}
-{% block title %}Detail{% endblock %}
+{% block title %}Details{% endblock %}
 {% block content %}
-<h3>Stack: {{ stack.name }}</h3>
-<div class="table-responsive">
-    <table class="table table-condensed">
-        {% for i in detail %}
-        <tr>
-            <td><label for="{{ i }}">{{ i }}</label></td>
-            <td><label for="{{ detail[i] }}">{{ detail[i] }}</label></td>
-        </tr>
-        {% endfor %}
-    </table>
+<div class="jumbotron jumbotron-fluid">
+    <div class="container">
+        <h1 class="display-6">Details.</h1>
+    </div>
 </div>
+
+<div class="card" style="padding:25px; margin:25px;">
+    <h4 class="card-header">Stack: {{ stack.name }}</h4>
+    <div class="card-body">
+        {% for i in detail %}
+        <h4 class="card-title">{{ i }}</h4>
+        <p class="card-text">{{ detail[i] }}</p>
+        {% endfor %}
+    </div>
+</div>
+
 {% endblock %}
