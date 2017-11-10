@@ -1,34 +1,39 @@
 from flask import Flask, request, render_template, jsonify, Response
 from classes import RancherAPI, Env
-from functions import environment, create_stack, create_database
+from functions import environment, create_stack, create_database, conver_to_html, get_database_host
 from functions import delete_stack as del_stack
 
 app = Flask(__name__)
 
 envs = Env()
 envs = environment(envs)
+get_database_host(envs)
 
 magic_list = ['id','name', 'environment']
 
-#envs.env['RANCHER_API_URL'] =
-#envs.env['RANCHER_API_KEY'] =
-#envs.env['RANCHER_API_SECRET'] =
+envs.app_env['RANCHER_API_URL'] = 'https://appfurnish.appfurnish.com'
+envs.app_env['RANCHER_API_KEY'] = '508AF877ED6BBA5DCF21'
+envs.app_env['RANCHER_API_SECRET'] = 'DvsN6BxEdZEvgWkyvP6Lj1Btw8J8i6LKaZMUmgiH'
 
 def prepare_create(request):
-    error = {'type': 'succsess'}
+    baseerror = {'type': 'succsess'}
+    stackerror = {'type': 'succsess'}
+
     x = request.form.get('site-url')
     y = request.form.get('instance_name')
     if x and y:
+        stackerror = create_stack(x,y, env=envs)
+        if stackerror.get('type') == 'error': return Response(response=str(stackerror.get('status')) + ' ' + stackerror.get('code'),
+                                                         status=stackerror.get('status'))
         try:
             create_database(y, env=envs)
         except:
             pass
-            #error = {'type': 'error', 'status': 500, 'code': 'Database was not created'}
-        if error.get('type') == 'error': return Response(response=str(error.get('status')) + ' ' + error.get('code'),
-                                                         status=error.get('status'))
-        error = create_stack(x,y, env=envs)
-        if error.get('type') == 'error': return Response(response=str(error.get('status')) + ' ' + error.get('code'),
-                                                         status=error.get('status'))
+            #baseerror = {'type': 'error', 'status': 500, 'code': 'Database was not created'}
+        if baseerror.get('type') == 'error':
+            del_stack(stackerror.get('id'), env=envs)
+            return Response(response=str(baseerror.get('status')) + ' ' + baseerror.get('code'),
+                                                         status=baseerror.get('status'))
 
 def query_args(func):
     def wrapper(*args, **kwargs):
@@ -51,7 +56,7 @@ def list_stack(q_args=None, **kwargs):
     if not envs.app_env.get('RANCHER_API_URL'): return render_template('get_url.html')
     r = RancherAPI(key=envs.app_env.get('RANCHER_API_KEY'), secret=envs.app_env.get('RANCHER_API_SECRET'), base_url=envs.app_env.get('RANCHER_API_URL'))
     r.set_project()
-    stacks =[(i.get('id'), i.get('name'), envs.app_env['RANCHER_API_URL']) for i in r.get_stack_list().get('data') if i.get('group') == "io.rancher.service.create_by_app"]
+    stacks =[(i.get('id'), i.get('name'), i.get('environment').get('SITEURL')) for i in r.get_stack_list().get('data') if i.get('group') == "io.rancher.service.create_by_app"]
     return render_template('stack_list.html', stacks=stacks, base_url=envs.app_env.get('RANCHER_API_URL'))
 
 @app.route("/add", methods=['GET', 'POST'])
@@ -82,7 +87,8 @@ def delete_stack(name, q_args=None, **kwargs):
 @app.route("/help/", methods=['GET'])
 @query_args
 def help_me(q_args=None, **kwargs):
-    return Response(response='Help here!', status=200)
+    x = conver_to_html()
+    return Response(response='Help here!', status=200, help_me=x)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)

@@ -4,22 +4,26 @@ import MySQLdb
 import uuid
 import yaml
 from classes import Env, RancherAPI
+import markdown
 
 def environment(env_class_obj):
     e = env_class_obj.app_env
     for i in os.environ:
         if i in e:
             e[i] = os.environ[i]
-            continue
         x = re.match(r'MAIL_.*', i)
         if x:
             e[i] = os.environ[i]
-            continue
         x = re.match(r'RANCHER_.*', i)
         if x:
             e[i] = os.environ[i]
-            continue
+        if i == 'DB_HOST':
+            env_class_obj.db_host_set = True
+            env_class_obj.docker_env[i] = os.environ[i]
     return env_class_obj
+
+def get_database_host(env_class_obj):
+    if env_class_obj.db_host_set: return True
 
 def create_database(database, env=None):
     user = database + '_user'
@@ -55,9 +59,10 @@ def frormat_compose(str_obj, env=None):
     return x
 
 def delete_stack(stack_name, env=None):
-    x = RancherAPI(key=env.env.get('RANCHER_API_KEY'), secret=env.env.get('RANCHER_API_SECRET'),
-                   base_url=env.env.get('RANCHER_API_URL'))
+    x = RancherAPI(key=env.app_env.get('RANCHER_API_KEY'), secret=env.app_env.get('RANCHER_API_SECRET'),
+                   base_url=env.app_env.get('RANCHER_API_URL'))
     x.set_project()
+    x.set_stack_id(name=stack_name)
     return x.remove_stack()
 
 def create_stack(site_url, stack_name, env=None):
@@ -69,6 +74,7 @@ def create_stack(site_url, stack_name, env=None):
 
     x = RancherAPI(key=env.app_env.get('RANCHER_API_KEY'), secret=env.app_env.get('RANCHER_API_SECRET'), base_url=env.app_env.get('RANCHER_API_URL'))
     x.environment['SITEURL'] = site_url
+    env.docker_env['SITE_URL'] = site_url
     x.set_project()
     if len(x.errordata): return x.errordata
     try:
@@ -88,3 +94,9 @@ def create_stack(site_url, stack_name, env=None):
         x.register_lb()
         if len(x.errordata): return x.errordata
     return {'id': x.id, 'name': x.name, 'type': 'succsess'}
+
+def conver_to_html():
+    f = open('Readme.md', 'r')
+    x = markdown.Markdown(output_format='html').convert(f.read())
+    f.close()
+    return x

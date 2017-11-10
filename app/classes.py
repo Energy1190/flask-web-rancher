@@ -12,6 +12,8 @@ class Env():
 
     lb_env = {'protocol': 'HTTP', 'ports_map': [(80, 5000)]}
 
+    db_host_set = False
+
 class RancherAPI():
     def __init__(self, key=None, secret=None, base_url=None):
         self.project = None
@@ -111,7 +113,13 @@ class RancherAPI():
             self.loadbalancer = self.get_load_balancer_list()['data'][0]['id']
         else:
             self.loadbalancer = name
-            
+
+    def set_stack_id(self, name=None):
+        if not name and len(self.get_stack_list()['data']) == 1:
+            self.id = self.get_stack_list()['data'][0]['id']
+        else:
+            self.id = name
+
     def set_service_id(self, name=None):
         if not name and len(self.get_service_list()['data']) == 1:
             self.serviceid = self.get_service_list()['data'][0]['id']

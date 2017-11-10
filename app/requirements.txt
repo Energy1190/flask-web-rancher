@@ -2,3 +2,4 @@ mysqlclient
 requests
 flask
 pyyaml
+markdown

@@ -1,6 +1,7 @@
 FROM python:3
 
 ADD /app /app
+COPY Readme.md /app/Readme.md
 
 EXPOSE 80 443
 
