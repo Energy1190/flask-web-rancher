@@ -19,14 +19,13 @@ def prepare_create(request):
     y = request.form.get('instance_name')
     if x and y:
         stackerror = create_stack(x,y, env=envs)
-        print(stackerror)
         if stackerror.get('type') == 'error': return Response(response=str(stackerror.get('status')) + ' ' + stackerror.get('code'),
                                                          status=stackerror.get('status'))
         try:
             create_database(env=envs)
         except:
             pass
-            #baseerror = {'type': 'error', 'status': 500, 'code': 'Database was not created'}
+            baseerror = {'type': 'error', 'status': 500, 'code': 'Database was not created'}
         if baseerror.get('type') == 'error':
             del_stack(stackerror.get('id'), env=envs)
             return Response(response=str(baseerror.get('status')) + ' ' + baseerror.get('code'),
