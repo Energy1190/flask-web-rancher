@@ -37,8 +37,9 @@ def create_database(env=None):
     c.execute("CREATE USER IF NOT EXISTS '{}'@'%' IDENTIFIED BY '{}'".format(user, passwd))
     c.execute("GRANT ALL ON {}.* TO '{}'@'localhost' IDENTIFIED BY '{}'".format(database, user, passwd))
     c.execute("GRANT ALL ON {}.* TO '{}'@'%' IDENTIFIED BY '{}'".format(database, user, passwd))
-    c.commit()
     c.close()
+    
+    conn.commit()
     conn.close()
 
 def frormat_compose(str_obj, env=None):
