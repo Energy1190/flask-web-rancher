@@ -5,6 +5,8 @@ import uuid
 import yaml
 from classes import Env, RancherAPI
 import markdown
+import validators
+import re
 
 def environment(env_class_obj):
     e = env_class_obj.app_env
@@ -69,6 +71,12 @@ def create_stack(site_url, stack_name, env=None):
         r = x.read()
         x.close()
         return r
+
+    if not validators.url(site_url):
+        return {'status': 400, 'code': 'Invalid URL format', 'type': 'error'}
+
+    if not re.match(r'^[\w\d]+$', stack_name):
+        return {'status': 400, 'code': 'Invalid Instance name', 'type': 'error'}
 
     env.docker_env['DB_USERNAME'] = stack_name + '_user'
     env.docker_env['DB_PASSWORD'] = str(uuid.uuid4())
