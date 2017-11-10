@@ -114,7 +114,7 @@ def create_stack(site_url, stack_name, env=None):
             x.errordata['debug_detail'] = 'Register lb fail'
             return x.errordata
         x.lb = x.get_lb()
-        [x.lb['lbConfig']['portRules'].append({'type': 'portRule', 'hostname': (str(urlparse(site_url).hostname) or site_url), 'priority': 2, 'protocol': env.lb_env['protocol'], 'serviceId': x.serviceid, 'sourcePort': i[0], 'targetPort': i[1]})for i in env.lb_env['ports_map']]
+        [x.lb['lbConfig']['portRules'].append({'type': 'portRule', 'hostname': (urlparse(site_url).hostname or site_url), 'priority': 2, 'protocol': env.lb_env['protocol'], 'serviceId': x.serviceid, 'sourcePort': i[0], 'targetPort': i[1]})for i in env.lb_env['ports_map']]
         x.update_lb()
         if len(x.errordata):
             x.errordata['debug_detail'] = 'Update lb fail'
