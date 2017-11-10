@@ -89,8 +89,9 @@ def create_stack(site_url, stack_name, env=None):
     if len(x.errordata): return x.errordata
 
     if x.loadbalancer:
-        x.set_service_id()
+        x.set_service_id(name=env.app_env.get('RANCHER_SERVICE_NAME'))
         if len(x.errordata): return x.errordata
+        if not x.serviceid: return {'type': 'error', 'status': 500, 'code': 'Empty ServiceId, service was not created'}
         x.register_lb()
         if len(x.errordata): return x.errordata
     return {'id': x.id, 'name': x.name, 'type': 'succsess'}

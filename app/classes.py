@@ -120,11 +120,15 @@ class RancherAPI():
         else:
             self.id = name
 
-    def set_service_id(self, name=None):
-        if not name and len(self.get_service_list()['data']) == 1:
+    def set_service_id(self, name=None, id=None):
+        if not name and not id and len(self.get_service_list()['data']) == 1:
             self.serviceid = self.get_service_list()['data'][0]['id']
-        else:
-            self.serviceid = name
+        elif id:
+            self.serviceid = id
+        elif name:
+            x =[i['id'] for i in self.get_service_list()['data'] if i['name'] == name]
+            if len(x) == 1: self.serviceid = x[0]
+        print('set_service_id', self.serviceid)
             
     def set_data(self):
         self.data['type'] = 'stack'

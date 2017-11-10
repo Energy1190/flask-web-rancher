@@ -88,7 +88,7 @@ def delete_stack(name, q_args=None, **kwargs):
 @query_args
 def help_me(q_args=None, **kwargs):
     x = conver_to_html()
-    return Response(response='Help here!', status=200, help_me=x)
+    return render_template('help.html', help_me=x)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
