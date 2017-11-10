@@ -10,6 +10,29 @@
     {% block script%}{% endblock %}
 </head>
 <body>
-{% block content %}{% endblock %}
+<nav class="navbar navbar-toggleable-md navbar-light bg-faded">
+  <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <a class="navbar-brand" href="#">Stack management</a>
+
+  <div class="collapse navbar-collapse" id="navbarSupportedContent">
+    <ul class="navbar-nav mr-auto">
+      <li class="nav-item active">
+        <a class="nav-link" href="{{ url_for('list_stack') }}">List<span class="sr-only"></span></a>
+      </li>
+
+      <li class="nav-item active">
+        <a class="nav-link" href="{{ url_for('add_stack') }}">Add<span class="sr-only"></span></a>
+      </li>
+
+      <li class="nav-item active">
+        <a class="nav-link" href="{{ url_for('help_me') }}">Help<span class="sr-only"></span></a>
+      </li>
+  </div>
+</nav>
+	<div class="container theme-showcase" role="main">
+  		{% block content %}{% endblock %}
+	</div>
 </body>
 </html>

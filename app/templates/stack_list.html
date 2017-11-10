@@ -1,8 +1,7 @@
 {% extends "base.html" %}
 {% block title %}List{% endblock %}
 {% block content %}
-<h1>Hello! You service list.</h1>
-<h2>Site-url: {{ base_url }}</h2>
+<h3>Service list:</h3>
 {% for i in stacks %}
 <div class="table-responsive">
     <table class="table table-condensed">
@@ -20,6 +19,7 @@
         </tr>
         <tr>
             <td><label for="detail"><a href="{{ url_for('detail_stack', name=i[0]) }}">Detail</a></label></td>
+            <td><label for="delete"><a href="{{ url_for('delete_stack', name=i[0]) }}">Delete</a></label></td>
         </tr>
     </table>
 </div>

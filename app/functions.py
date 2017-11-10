@@ -1,6 +1,8 @@
 import os
 import re
 import MySQLdb
+import uuid
+import yaml
 from classes import Env, RancherAPI
 
 def environment_from_file(env_class_obj):
@@ -30,28 +32,43 @@ def environment(env_class_obj):
     return env_class_obj
 
 def create_database(database, env=None):
-    conn = MySQLdb.connect(user=env['DB_ADMIN_USERNAME'],passwd=env['DB_ADMIN_PASSWORD'],host=env['DB_HOST'],port=env['DB_PORT'])
+    user = database + '_user'
+    passwd = str(uuid.uuid4())
+
+    conn = MySQLdb.connect(user=env.app_env['DB_ADMIN_USERNAME'],passwd=env.app_env['DB_ADMIN_PASSWORD'],host=env.app_env['DB_HOST'],port=env.app_env['DB_PORT'])
     c = conn.cursor()
 
     c.execute("CREATE DATABASE IF NOT EXISTS {} COLLATE = 'utf8_general_ci' CHARACTER SET = 'utf8'".format(database))
-    c.execute("CREATE USER IF NOT EXISTS '{}'@'%' IDENTIFIED BY {}".format(database, database))
-    c.execute("GRANT ALL ON {}.* TO '{}'@'localhost' IDENTIFIED BY {}".format(database, database, database))
-    c.execute("GRANT ALL ON {}.* TO '{}'@'%' IDENTIFIED BY '{}".format(database, database, database))
+    c.execute("CREATE USER IF NOT EXISTS '{}'@'%' IDENTIFIED BY {}".format(user, passwd))
+    c.execute("GRANT ALL ON {}.* TO '{}'@'localhost' IDENTIFIED BY {}".format(database, user, passwd))
+    c.execute("GRANT ALL ON {}.* TO '{}'@'%' IDENTIFIED BY '{}".format(database, user, passwd))
     c.commit()
     c.close()
     conn.close()
 
-def frormat_compose(str_obj, env=None):
-    def regxp(s,env):
-        for i in env:
-            r = env[i]
-            x = re.findall(i, s)
-            if x and r:
-                s = s.replace(x[0], r)
-        return s
+    env.docker_env['DB_USERNAME'] = user
+    env.docker_env['DB_PASSWORD'] = passwd
+    env.docker_env['DB_NAME'] = database
 
-    x = [regxp(i, env) for i in str_obj.split(sep='\n')]
-    return '\n'.join(x)
+def frormat_compose(str_obj, env=None):
+    def set_env(environment, env=None):
+        if not environment: environment = {}
+        for i in env:
+            environment[i] = env[i]
+        return environment
+
+    x = yaml.load(str_obj)
+    for i in x['services']:
+        x['services'][i]['environment'] = set_env(x['services'][i].get('environment'), env=env)
+
+    x = yaml.dump(x)
+    return x
+
+def delete_stack(stack_name, env=None):
+    x = RancherAPI(key=env.env.get('RANCHER_API_KEY'), secret=env.env.get('RANCHER_API_SECRET'),
+                   base_url=env.env.get('RANCHER_API_URL'))
+    x.set_project()
+    return x.remove_stack()
 
 def create_stack(site_url, stack_name, env=None):
     def f_read(file):
@@ -60,18 +77,24 @@ def create_stack(site_url, stack_name, env=None):
         x.close()
         return r
 
-    x = RancherAPI(key=env.env.get('RANCHER_API_KEY'), secret=env.env.get('RANCHER_API_SECRET'), base_url=env.env.get('RANCHER_API_URL'))
+    x = RancherAPI(key=env.app_env.get('RANCHER_API_KEY'), secret=env.app_env.get('RANCHER_API_SECRET'), base_url=env.app_env.get('RANCHER_API_URL'))
     x.environment['SITEURL'] = site_url
     x.set_project()
-    x.dockercompose = frormat_compose(f_read('files/docker-compose.yaml'), env=env.env)
-    x.ranchercompose = frormat_compose(f_read('files/rancher-compose.yaml'), env=env.env)
+    if len(x.errordata): return x.errordata
+    try:
+        x.dockercompose = frormat_compose(f_read('files/docker-compose.yaml'), env=env.docker_env)
+    except:
+        return {'status': 500, 'code': 'Yaml parsing error', 'type': 'error'}
+    x.ranchercompose = f_read('files/rancher-compose.yaml')
     x.name = stack_name
     x.create_stack()
+    if len(x.errordata): return x.errordata
     x.set_load_balancer()
-    try:
-        if x.loadbalancer: 
-            x.set_service_id()
-            x.register_lb()
-    except:
-        print('Load balancer was not created.')
-    return (x.id, x.name)
+    if len(x.errordata): return x.errordata
+
+    if x.loadbalancer:
+        x.set_service_id()
+        if len(x.errordata): return x.errordata
+        x.register_lb()
+        if len(x.errordata): return x.errordata
+    return {'id': x.id, 'name': x.name, 'type': 'succsess'}

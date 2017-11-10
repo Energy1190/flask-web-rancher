@@ -4,8 +4,13 @@ import requests
 from requests.auth import HTTPBasicAuth
 
 class Env():
-    env = {'DB_CONNECTION': None, 'DB_HOST': None, 'DB_PORT': 0, 'DB_ADMIN_USERNAME': None, 'DB_ADMIN_PASSWORD': None, 'URL': None,
-           'DB_CREATED': False}
+    app_env = {'LB_NAME': None, 'DB_HOST': '127.0.0.1', 'DB_PORT': 3306, 'DB_ADMIN_USERNAME': None, 'DB_ADMIN_PASSWORD': None,
+               'RANCHER_API_URL': None, 'RANCHER_API_KEY': False, 'RANCHER_API_SECRET': False}
+
+    docker_env = {'DB_HOST': '127.0.0.1', 'DB_PORT': 3306, 'DB_USERNAME': None, 'DB_PASSWORD': None, 'DB_NAME': None,
+                  'SITE_URL': None}
+
+    lb_env = {'protocol': 'HTTP', 'ports_map': [(80, 5000)]}
 
 class RancherAPI():
     def __init__(self, key=None, secret=None, base_url=None):
@@ -31,12 +36,15 @@ class RancherAPI():
         self.group = "io.rancher.service.create_by_app"
 
         self.data = {}
+        self.errordata = {}
 
     def error(func):
         def wrap(self, *args, **kwargs):
             x = func(self, *args, **kwargs)
             if x.get('type') == 'error':
-                assert False, 'There was an error: {} as "{}".'.format(x.get('status'), x.get('code'))
+                self.errordata = x
+            else:
+                self.errordata = {}
             return x
         return wrap
 
@@ -82,6 +90,14 @@ class RancherAPI():
     def get_load_balancer_list(self, **kwargs):
         assert self.project
         x = requests.get(self.base_url + '/v2-beta/projects/{}/loadbalancerservices'.format(self.project), **kwargs)
+        return x.json()
+
+    @auth
+    @error
+    def get_service_list(self, **kwargs):
+        assert self.project
+        assert self.id
+        x = requests.get(self.base_url + '/v2-beta/projects/{}/stacks/{}/services'.format(self.project, self.id), **kwargs)
         return x.json()
 
     def set_project(self, name=None):
@@ -155,11 +171,4 @@ class RancherAPI():
         data = {"serviceLink": {"name":self.name + '_lb', "serviceid": self.serviceid, "uuid": uuid.uuid4()}}
         x = requests.post(self.base_url + '/v2-beta/projects/{}/loadbalancerservices/{}/?action=addservicelink'.format(self.project, self.loadbalancer), data=json.dumps(data), **kwargs)
         return x.json()
-    
-    @auth
-    @error
-    def get_service_list(self, **kwargs):
-        assert self.project
-        assert self.id
-        x = requests.get(self.base_url + '/v2-beta/projects/{}/stacks/{}/services'.format(self.project, self.id), **kwargs)
-        return x.json()
+
