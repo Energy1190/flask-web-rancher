@@ -11,10 +11,6 @@ get_database_host(envs)
 
 magic_list = ['id','name', 'environment']
 
-envs.app_env['RANCHER_API_URL'] = 'https://appfurnish.appfurnish.com'
-envs.app_env['RANCHER_API_KEY'] = '508AF877ED6BBA5DCF21'
-envs.app_env['RANCHER_API_SECRET'] = 'DvsN6BxEdZEvgWkyvP6Lj1Btw8J8i6LKaZMUmgiH'
-
 def prepare_create(request):
     baseerror = {'type': 'succsess'}
     stackerror = {'type': 'succsess'}
@@ -23,10 +19,11 @@ def prepare_create(request):
     y = request.form.get('instance_name')
     if x and y:
         stackerror = create_stack(x,y, env=envs)
+        print(stackerror)
         if stackerror.get('type') == 'error': return Response(response=str(stackerror.get('status')) + ' ' + stackerror.get('code'),
                                                          status=stackerror.get('status'))
         try:
-            create_database(y, env=envs)
+            create_database(env=envs)
         except:
             pass
             #baseerror = {'type': 'error', 'status': 500, 'code': 'Database was not created'}

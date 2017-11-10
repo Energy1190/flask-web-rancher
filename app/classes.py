@@ -1,5 +1,6 @@
 import uuid
 import json
+import time
 import requests
 from requests.auth import HTTPBasicAuth
 
@@ -10,7 +11,7 @@ class Env():
     docker_env = {'DB_HOST': '127.0.0.1', 'DB_PORT': 3306, 'DB_USERNAME': None, 'DB_PASSWORD': None, 'DB_NAME': None,
                   'SITE_URL': None}
 
-    lb_env = {'protocol': 'HTTP', 'ports_map': [(80, 5000)]}
+    lb_env = {'protocol': 'http', 'ports_map': [(80, 5000)]}
 
     db_host_set = False
 
@@ -124,15 +125,22 @@ class RancherAPI():
         else:
             self.id = name
 
-    def set_service_id(self, name=None, id=None):
+    def set_service_id(self, name=None, id=None, r=False):
         if not name and not id and len(self.get_service_list()['data']) == 1:
             self.serviceid = self.get_service_list()['data'][0]['id']
+            return True
         elif id:
             self.serviceid = id
+            return True
         elif name:
             x =[i['id'] for i in self.get_service_list()['data'] if i['name'] == name]
-            if len(x) == 1: self.serviceid = x[0]
-        print('set_service_id', self.serviceid)
+            if len(x) == 1:
+                self.serviceid = x[0]
+                return True
+        elif not r:
+            time.sleep(5)
+            self.set_service_id(name=name, id=id, r=True)
+
             
     def set_data(self):
         self.data['type'] = 'stack'
@@ -184,13 +192,13 @@ class RancherAPI():
         assert self.project
         assert self.loadbalancer
         assert self.serviceid
-        data = {"serviceLink": {"name":self.name + '_lb', "serviceid": self.serviceid, "uuid": uuid.uuid4()}}
+        data = {"serviceLink": {"name":self.name + '_lb', "serviceId": self.serviceid, "uuid": str(uuid.uuid4())}}
         x = requests.post(self.base_url + '/v2-beta/projects/{}/loadbalancerservices/{}/?action=addservicelink'.format(self.project, self.loadbalancer), data=json.dumps(data), **kwargs)
         return x.json()
 
     @auth
     @error
-    def get_lb(self):
+    def get_lb(self, **kwargs):
         assert self.project
         assert self.loadbalancer
         x = requests.get(self.base_url + '/v2-beta/projects/{}/loadbalancerservices/{}'.format(self.project, self.loadbalancer), **kwargs)
@@ -198,10 +206,10 @@ class RancherAPI():
 
     @auth
     @error
-    def update_lb(self):
+    def update_lb(self, **kwargs):
         assert self.project
         assert self.loadbalancer
         assert self.lb
         data = self.lb
-        x = requests.put(self.base_url + '/v2-beta/projects/{}/loadbalancerservices/{}'.format(self.project, self.loadbalancer), data=data, **kwargs)
+        x = requests.put(self.base_url + '/v2-beta/projects/{}/loadbalancerservices/{}'.format(self.project, self.loadbalancer), data=json.dumps(data), **kwargs)
         return x.json()

@@ -25,9 +25,10 @@ def environment(env_class_obj):
 def get_database_host(env_class_obj):
     if env_class_obj.db_host_set: return True
 
-def create_database(database, env=None):
-    user = database + '_user'
-    passwd = str(uuid.uuid4())
+def create_database(env=None):
+    database = env.docker_env['DB_NAME']
+    user = env.docker_env['DB_USERNAME']
+    passwd = env.docker_env['DB_PASSWORD']
 
     conn = MySQLdb.connect(user=env.app_env['DB_ADMIN_USERNAME'],passwd=env.app_env['DB_ADMIN_PASSWORD'],host=env.app_env['DB_HOST'],port=env.app_env['DB_PORT'])
     c = conn.cursor()
@@ -39,10 +40,6 @@ def create_database(database, env=None):
     c.commit()
     c.close()
     conn.close()
-
-    env.docker_env['DB_USERNAME'] = user
-    env.docker_env['DB_PASSWORD'] = passwd
-    env.docker_env['DB_NAME'] = database
 
 def frormat_compose(str_obj, env=None):
     def set_env(environment, env=None):
@@ -72,6 +69,10 @@ def create_stack(site_url, stack_name, env=None):
         x.close()
         return r
 
+    env.docker_env['DB_USERNAME'] = stack_name + '_user'
+    env.docker_env['DB_PASSWORD'] = str(uuid.uuid4())
+    env.docker_env['DB_NAME'] = stack_name
+
     x = RancherAPI(key=env.app_env.get('RANCHER_API_KEY'), secret=env.app_env.get('RANCHER_API_SECRET'), base_url=env.app_env.get('RANCHER_API_URL'))
     x.environment['SITEURL'] = site_url
     env.docker_env['SITE_URL'] = site_url
@@ -84,17 +85,30 @@ def create_stack(site_url, stack_name, env=None):
     x.ranchercompose = f_read('files/rancher-compose.yaml')
     x.name = stack_name
     x.create_stack()
-    if len(x.errordata): return x.errordata
+    if len(x.errordata):
+        x.errordata['debug_detail'] = 'Create stack fail'
+        return x.errordata
     x.set_load_balancer(name=env.app_env.get('RANCHER_LB_NAME'))
-    if len(x.errordata): return x.errordata
+    if len(x.errordata):
+        x.errordata['debug_detail'] = 'Set lb fail'
+        return x.errordata
 
     if x.loadbalancer:
         x.set_service_id(name=env.app_env.get('RANCHER_SERVICE_NAME'))
-        if len(x.errordata): return x.errordata
+        if len(x.errordata):
+            x.errordata['debug_detail'] = 'Set serviceId fail'
+            return x.errordata
         if not x.serviceid: return {'type': 'error', 'status': 500, 'code': 'Empty ServiceId, service was not created'}
         x.register_lb()
-        if len(x.errordata): return x.errordata
-        print(x.get_lb())
+        if len(x.errordata):
+            x.errordata['debug_detail'] = 'Register lb fail'
+            return x.errordata
+        x.lb = x.get_lb()
+        [x.lb['lbConfig']['portRules'].append({'type': 'portRule', 'hostname': '', 'priority': 2, 'protocol': env.lb_env['protocol'], 'serviceId': x.serviceid, 'sourcePort': i[0], 'targetPort': i[1]})for i in env.lb_env['ports_map']]
+        x.update_lb()
+        if len(x.errordata):
+            x.errordata['debug_detail'] = 'Update lb fail'
+            return x.errordata
     return {'id': x.id, 'name': x.name, 'type': 'succsess'}
 
 def conver_to_html():
