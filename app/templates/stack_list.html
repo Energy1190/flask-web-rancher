@@ -1,27 +1,22 @@
 {% extends "base.html" %}
-{% block title %}List{% endblock %}
+{% block title %}Display instances{% endblock %}
 {% block content %}
-<h3>Stack list:</h3>
+<div class="jumbotron jumbotron-fluid">
+    <div class="container">
+        <h1 class="display-6">Display instances.</h1>
+    </div>
+</div>
+
 {% for i in stacks %}
-<div class="table-responsive">
-    <table class="table table-condensed">
-        <tr>
-            <td><label for="id">ID</label></td>
-            <td><label for="{{ i[0] }}">{{ i[0] }}</label></td>
-        </tr>
-        <tr>
-            <td><label for="name">Name</label></td>
-            <td><label for="{{ i[1] }}">{{ i[1] }}</label></td>
-        </tr>
-        <tr>
-            <td><label for="url">Url</label></td>
-            <td><label for="{{ i[2] }}">{{ i[2] }}</label></td>
-        </tr>
-        <tr>
-            <td><label for="detail"><a href="{{ url_for('detail_stack', name=i[0]) }}">Detail</a></label></td>
-            <td><label for="delete"><a href="{{ url_for('delete_stack', name=i[0]) }}">Delete</a></label></td>
-        </tr>
-    </table>
+<div class="card" style="padding:25px; margin:25px;">
+    <h4 class="card-header">&nbsp;</h4>
+    <div class="card-body">
+        <h4 class="card-title">Instance name: {{ i[1] }}</h4>
+        <p class="card-text">Site URL: <a href="{{ i[2] }}">{{ i[2] }}</a></p>
+        <a href="{{ url_for('detail_stack', name=i[0]) }}" class="btn btn-primary">Detail</a>
+        <a href="{{ url_for('delete_stack', name=i[0]) }}" class="btn btn-danger">Remove</a>
+    </div>
 </div>
 {% endfor %}
+
 {% endblock %}
