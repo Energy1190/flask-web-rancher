@@ -1,7 +1,39 @@
 version: '2'
-
+    
 services:
-    nginx:
-        container_name: streaming-nginx
-        image: nginx:stable
+  streaming-nginx:
+    image: mkwithus/videostream-nginx-vod:latest
+    stdin_open: true
+    tty: true
+    links:
+      - streaming-app:app
+    labels:
+      io.rancher.container.pull_image: always
+    volumes:
+      - app-public:/var/www/public:ro
 
+  streaming-app:
+    image: mkwithus/videostream:latest
+    environment:
+      DB_CONNECTION: mysql
+      XDEBUG_CONFIG: remote_host=192.168.0.105
+      PHP_IDE_CONFIG: serverName=my.local
+    stdin_open: true
+    volumes:
+      - app-public:/var/www/public
+      - app-storage:/var/www/storage
+      - app-cache:/var/www/bootstrap/cache
+    tty: true
+    labels:
+      io.rancher.container.pull_image: always
+
+volumes:
+  app-cache:
+    external: true
+    driver: rancher-nfs
+  app-storage:
+    external: true
+    driver: rancher-nfs
+  app-public:
+    external: true
+    driver: rancher-nfs
