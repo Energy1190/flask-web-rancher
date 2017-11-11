@@ -29,11 +29,8 @@ services:
 
 volumes:
   app-cache:
-    external: true
     driver: rancher-nfs
   app-storage:
-    external: true
     driver: rancher-nfs
   app-public:
-    external: true
     driver: rancher-nfs
