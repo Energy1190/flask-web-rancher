@@ -2,6 +2,7 @@ from flask import Flask, request, render_template, jsonify, Response
 from classes import RancherAPI, Env
 from functions import environment, create_stack, create_database, conver_to_html, get_database_host
 from functions import delete_stack as del_stack
+from werkzeug.serving import run_simple
 
 app = Flask(__name__)
 
@@ -90,4 +91,5 @@ def help_me(q_args=None, **kwargs):
     return render_template('help.html', help_me=x)
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, processes=5)
+    #app.run(host="0.0.0.0", port=5000, processes=5)
+    run_simple('0.0.0.0', 5000, app, use_reloader=True, threaded=True)
