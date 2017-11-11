@@ -35,7 +35,7 @@ class RancherAPI():
         self.dockercompose = None
         self.ranchercompose = None
         self.description = None
-        self.environment = {'SITEURL': None}
+        self.environment = {'APP_URL': None}
         self.group = "io.rancher.service.create_by_app"
         self.startOnCreate = True
 
