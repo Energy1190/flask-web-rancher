@@ -28,7 +28,7 @@ def get_database_host(env_class_obj):
     if env_class_obj.db_host_set: return True
 
 def create_database(env=None):
-    database = env.docker_env['DB_NAME']
+    database = env.docker_env['DB_DATABASE']
     user = env.docker_env['DB_USERNAME']
     passwd = env.docker_env['DB_PASSWORD']
 
