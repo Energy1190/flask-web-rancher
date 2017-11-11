@@ -11,7 +11,7 @@ class Env():
     docker_env = {'DB_HOST': '127.0.0.1', 'DB_PORT': 3306, 'DB_USERNAME': None, 'DB_PASSWORD': None, 'DB_DATABASE': None,
                   'SITE_URL': None}
 
-    lb_env = {'protocol': 'http', 'ports_map': [(80, 5000)]}
+    lb_env = {'protocol': 'http', 'ports_map': [(80, 80)]}
 
     db_host_set = False
 
