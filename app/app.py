@@ -51,7 +51,6 @@ def query_args(func):
 @app.route("/", methods=['GET', 'POST'])
 @query_args
 def list_stack(q_args=None, answ_json=False, **kwargs):
-    if not envs.app_env.get('RANCHER_API_URL'): return render_template('get_url.html')
     r = RancherAPI(key=envs.app_env.get('RANCHER_API_KEY'), secret=envs.app_env.get('RANCHER_API_SECRET'), base_url=envs.app_env.get('RANCHER_API_URL'))
     r.set_project()
     stacks =[(i.get('id'), i.get('name'), i.get('environment').get('SITEURL')) for i in r.get_stack_list().get('data') if i.get('group') == "io.rancher.service.create_by_app"]
@@ -66,7 +65,6 @@ def add_stack(q_args=None, **kwargs):
 @app.route("/detail/<name>", methods=['GET'])
 @query_args
 def detail_stack(name, q_args=None, answ_json=False, **kwargs):
-    if not envs.app_env.get('RANCHER_API_URL'): return render_template('get_url.html')
     r = RancherAPI(key=envs.app_env.get('RANCHER_API_KEY'), secret=envs.app_env.get('RANCHER_API_SECRET'), base_url=envs.app_env.get('RANCHER_API_URL'))
     r.set_project()
     x = r.get_stack(name)
