@@ -92,4 +92,4 @@ def help_me(q_args=None, **kwargs):
 
 if __name__ == "__main__":
     #app.run(host="0.0.0.0", port=5000, processes=5)
-    run_simple('0.0.0.0', 5000, app, use_reloader=True, threaded=True)
+    run_simple('0.0.0.0', 5000, app, threaded=True)
