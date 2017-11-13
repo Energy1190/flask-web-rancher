@@ -16,12 +16,14 @@ There also exist a number of optional variables:
 
 - `RANCHER_LB_NAME`
 - `RANCHER_SERVICE_NAME`
+- `RANCHER_ENVIRONMENT_NAME`
 - `DB_ADMIN_USERNAME`
 - `DB_PORT`
 
 ###### Note:
 Variable `RANCHER_LB_NAME` specifies the name of the load balancer service, if this value is not specified, the program assumes that you have one balancer and uses it. If you have more than one balancer and this variable is not set, the program will not work.
 Variable `RANCHER_SERVICE_NAME` specifies the name of the service d in the created stack that will be used on the load balancer, if this variable is not specified, the application assumes that you have one service in the created stack and uses it. If you have more than one service in the stack, and the variable is not defined, the application will not work.
+Variable `RANCHER_ENVIRONMENT_NAME` specifies the name of the service to which variables will be passed to connect to the database. If this variable is not set, the variables for connection to the database will be passed to all services on the stack.
 Variables `DB_PORT` and `DB_ADMIN_USERNAME` are specified by the application by default `3306` and `root`. But you can change them if necessary.
 
 # Customization
