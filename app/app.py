@@ -13,6 +13,22 @@ get_database_host(envs)
 
 magic_list = ['id','name', 'environment']
 
+def generate_response(status=None, code=None, name=None, id=None, description=None, ajson=None):
+    if ajson:
+        ajson = 'application/json'
+        func = json.dumps
+        msg = {'status': status, 'code': code, 'name': name, 'id': id, 'description': description}
+    else:
+        func = str
+        msg = ' '.join([i for i in [str(status), code, (name and 'service name: ' + str(name) or None), (id and 'service id: ' + str(id) or None),
+                        (description and 'as ' + str(description) or None)] if i])
+    if not status or not code:
+        if ajson: msg = {'status': 500, 'code': 'No response data', 'name': None, 'id': None, 'description': None}
+        else: 
+            status=500
+            msg = '500 No response data'
+    return Response(response=func(msg), status=status, mimetype=ajson)
+
 def prepare_create(request):
     baseerror = {'type': 'succsess'}
     stackerror = {'type': 'succsess'}
@@ -75,15 +91,13 @@ def detail_stack(name, q_args=None, answ_json=False, **kwargs):
 
 @app.route("/delete/<name>", methods=['GET'])
 @query_args
-def delete_stack(name, q_args=None, answ_json=False, **kwargs):
+def delete_stack(name, q_args=None, answ_json=None, **kwargs):
     x = del_stack(name, env=envs)
     if answ_json: answ_json = 'application/json'
     if x.get('type') == 'error':
-        return Response(response=str(x.get('status')) + ' ' + x.get('code'),
-                                                         status=x.get('status'), mimetype=(answ_json or None))
+        return generate_response(status=x.get('status'), code=x.get('code'), ajson=answ_json)
     elif answ_json:
-        return Response(response=json.dumps({'status': 200, 'id': x.get('id'), 'name': x.get('name'), 'state': x.get('state'), 'code': 'success'}),
-                                                         status=200, mimetype=(answ_json or None))
+        return generate_response(status=200, code='success', id=x.get('id'), name=x.get('name'), ajson=answ_json)
     else:
         return list_stack()
     
