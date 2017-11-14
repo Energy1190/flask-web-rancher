@@ -69,7 +69,7 @@ def detail_stack(name, q_args=None, answ_json=False, **kwargs):
     r.set_project()
     x = r.get_stack(name)
     detail = {i:x[i] for i in x if i in magic_list}
-    if answ_json: return jsonify(detail)
+    if answ_json: return jsonify((r, detail))
     return render_template('stack_detail.html', stack=r, detail=detail)
 
 @app.route("/delete/<name>", methods=['GET'])
