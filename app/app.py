@@ -1,3 +1,4 @@
+import json
 from flask import Flask, request, render_template, jsonify, Response
 from classes import RancherAPI, Env
 from functions import environment, create_stack, create_database, conver_to_html, get_database_host
@@ -74,11 +75,15 @@ def detail_stack(name, q_args=None, answ_json=False, **kwargs):
 
 @app.route("/delete/<name>", methods=['GET'])
 @query_args
-def delete_stack(name, q_args=None, **kwargs):
+def delete_stack(name, q_args=None, answ_json=False, **kwargs):
     x = del_stack(name, env=envs)
+    if answ_json: answ_json = 'application/json'
     if x.get('type') == 'error':
         return Response(response=str(x.get('status')) + ' ' + x.get('code'),
-                                                         status=x.get('status'))
+                                                         status=x.get('status'), mimetype=(answ_json or None))
+    elif answ_json:
+        return Response(response=json.dumps({'status': 200, 'id': x.get('id'), 'name': x.get('name'), 'state': x.get('state'), 'code': 'success'}),
+                                                         status=200, mimetype=(answ_json or None))
     else:
         return list_stack()
     
