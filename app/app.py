@@ -13,7 +13,23 @@ get_database_host(envs)
 
 magic_list = ['id','name', 'environment']
 
-def prepare_create(request, a_json=False):
+def generate_response(status=None, code=None, name=None, id=None, description=None, ajson=None):
+    if ajson:
+        ajson = 'application/json'
+        func = json.dumps
+        msg = {'status': status, 'code': code, 'name': name, 'id': id, 'description': description}
+    else:
+        func = str
+        msg = ' '.join([i for i in [str(status), code, (name and 'service name: ' + str(name) or None), (id and 'service id: ' + str(id) or None),
+                        (description and 'as ' + str(description) or None)] if i])
+    if not status or not code:
+        if ajson: msg = {'status': 500, 'code': 'No response data', 'name': None, 'id': None, 'description': None}
+        else: 
+            status=500
+            msg = '500 No response data'
+    return Response(response=func(msg), status=status, mimetype=ajson)
+
+def prepare_create(request, a_json=None):
     baseerror = {'type': 'succsess'}
     stackerror = {'type': 'succsess'}
 
@@ -22,18 +38,16 @@ def prepare_create(request, a_json=False):
     if x and y:
         stackerror = create_stack(x,y, env=envs)
         if stackerror.get('type') == 'error':
-            return Response(response=str(stackerror.get('status')) + ' ' + stackerror.get('code'),
-                                                         status=stackerror.get('status'), mimetype=(a_json or None))
+            return generate_response(status=stackerror.get('status'), code=stackerror.get('code'), ajson=a_json)
         try:
             create_database(env=envs)
         except:
             baseerror = {'type': 'error', 'status': 500, 'code': 'Database was not created'}
         if baseerror.get('type') == 'error':
             del_stack(stackerror.get('id'), env=envs)
-            return Response(response=str(baseerror.get('status')) + ' ' + baseerror.get('code'),
-                                                         status=baseerror.get('status'), mimetype=(a_json or None))
-
-    return Response(response=json.dumps({'result': 'succsess', 'instanse': x, 'site-url': y}), status=200, mimetype=(a_json or None))
+            return generate_response(status=baseerror.get('status'), code=baseerror.get('code'), ajson=a_json)
+    
+    return generate_response(status=200, code='succsess', name=x, description=y, ajson=a_json)
 
 def query_args(func):
     def wrapper(*args, redirected=False, **kwargs):
