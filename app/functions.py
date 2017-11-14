@@ -45,7 +45,7 @@ def create_database(env=None):
     conn.commit()
     conn.close()
 
-def frormat_compose(str_obj, env=None):
+def frormat_compose(str_obj, env=None, service=None):
     def set_env(environment, env=None):
         if not environment: environment = {}
         for i in env:
@@ -54,7 +54,8 @@ def frormat_compose(str_obj, env=None):
 
     x = yaml.load(str_obj)
     for i in x['services']:
-        x['services'][i]['environment'] = set_env(x['services'][i].get('environment'), env=env)
+        if not service or service and service == i:
+            x['services'][i]['environment'] = set_env(x['services'][i].get('environment'), env=env)
 
     x = yaml.dump(x)
     return x
@@ -89,7 +90,7 @@ def create_stack(site_url, stack_name, env=None):
     x.set_project()
     if len(x.errordata): return x.errordata
     try:
-        x.dockercompose = frormat_compose(f_read('files/docker-compose.yaml'), env=env.docker_env)
+        x.dockercompose = frormat_compose(f_read('files/docker-compose.yaml'), env=env.docker_env, service=env.app_env.get('RANCHER_ENVIRONMENT_NAME'))
     except:
         return {'status': 500, 'code': 'Yaml parsing error', 'type': 'error'}
     x.ranchercompose = f_read('files/rancher-compose.yaml')

@@ -6,7 +6,7 @@ from requests.auth import HTTPBasicAuth
 
 class Env():
     app_env = {'RANCHER_LB_NAME': None, 'DB_HOST': '127.0.0.1', 'DB_PORT': 3306, 'DB_ADMIN_USERNAME': 'root', 'DB_ADMIN_PASSWORD': None,
-               'RANCHER_API_URL': None, 'RANCHER_API_KEY': False, 'RANCHER_API_SECRET': False}
+               'RANCHER_API_URL': None, 'RANCHER_API_KEY': False, 'RANCHER_API_SECRET': False, 'RANCHER_ENVIRONMENT_NAME': None}
 
     docker_env = {'DB_HOST': '127.0.0.1', 'DB_PORT': 3306, 'DB_USERNAME': None, 'DB_PASSWORD': None, 'DB_DATABASE': None,
                   'SITE_URL': None}
