@@ -74,9 +74,8 @@ def list_stack(q_args=None, answ_json=False, **kwargs):
 
 @app.route("/add", methods=['GET', 'POST'])
 @query_args
-def add_stack(q_args=None, answ_json=False, **kwargs):
+def add_stack(q_args=None, answ_json=None, **kwargs):
     if request.method == 'POST':
-        if answ_json: answ_json = 'application/json'
         x = prepare_create(request, a_json=answ_json)
         if x: return x
     return render_template('stack_add.html')
